@@ -1,0 +1,20 @@
+{
+    "TWITTER_API_KEY": {
+        "consumer_key": "",
+        "consumer_secret": "",
+        "access_token_key": "",
+        "access_token_secret": ""
+    },
+    "TWITTER_EEW_ACCOUNT": { "follow": "16052553", "screen_name": "eew_jp" },
+    "TWITTER_EEW_SEISMIC_MATCH": ".*最大震度は震度(.+)です。.*",
+    "TWITTER_STREAM_FILTER": { "follow": "16052553", "screen_name": "eew_jp" },
+    "QUAKE_FILTER_CIRCLE_CENTER": { "latitude": 35.689699, "longitude": 139.7005794, "desc": "新宿駅" },
+    "QUAKE_FILTER_CIRCLE_RADIUS": 120000,
+    "OPPAI": {
+        "3": "おっ",
+        "4": "おっぱ",
+        "5": "おっぱい",
+        "6": "おっぱい！",
+        "7": "おっぱい！おっぱい！"
+    }
+}
