@@ -11,6 +11,7 @@ const ee = new EventEmitter();
 // tweet
 ee.on("tweet", function(tweet) {
     if (config.DEBUG) {
+        console.log("DEBUG tweet");
         console.log(tweet);
         return;
     }
@@ -52,7 +53,8 @@ ee.on("twitter.push", function(data) {
 //    if (!geolib.isPointInCircle(latlon, config.QUAKE_FILTER_CIRCLE_CENTER, config.QUAKE_FILTER_CIRCLE_RADIUS)) return;
 
     let m = data.text.match(new RegExp(config.TWITTER_EEW_SEISMIC_MATCH));
-    let { anytext = null, seismic = null } = (m == null) ? [] : m;
+    let [ anytext = null, seismic = null ] = (m == null) ? [] : m;
+    console.log(m);
 
     // 震度でツイート内容を変える
     let tweet = {
