@@ -16,7 +16,11 @@ ee.on("tweet", function(tweet) {
         return;
     }
     twitter.post("statuses/update", tweet, function(error, data, response) {
-        console.log(data.text);
+        console.log("statuses/update");
+        console.log(error);
+        console.log("----------");
+        console.log(data);
+        console.log("----------");
     });
 });
 
@@ -30,7 +34,8 @@ ee.on("twitter.push", function(data) {
         "id_str": id_str,
         "text": text = "",
         "user": {
-            "id_str": uid = ""
+            "id_str": uid = "",
+            "screen_name": screen_name = ""
         },
         "entities": {
             "urls": [
@@ -55,16 +60,19 @@ ee.on("twitter.push", function(data) {
     let m = data.text.match(new RegExp(config.TWITTER_EEW_SEISMIC_MATCH));
     let [ anytext = null, seismic = null ] = (m == null) ? [] : m;
     console.log(m);
+    console.log("seismic="+seismic);
 
     // 震度でツイート内容を変える
     let tweet = {
         status : config.OPPAI[seismic],
-        attachment_url : url,
+//        attachment_url : url,
+        attachment_url : `https://twitter.com/${screen_name}/status/${id_str}`,
         in_reply_to_status_id : id_str
     };
 
     if (tweet.status) {
         tweet.status += "テスト";
+        console.log(tweet);
         ee.emit("tweet", tweet);
     }
 });
