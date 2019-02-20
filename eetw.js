@@ -8,16 +8,17 @@ const EventEmitter = require("events").EventEmitter;
 const twitter = new Twitter(config.TWITTER_API_KEY);
 const ee = new EventEmitter();
 
-const sleep = (sec, func) => {
+const sleep = (sec, func, ...args) => {
     return new Promise(resolve => {
-        setTimeout(() => {
-            resolve(func())
-        }, sec * 1000)
+        setTimeout((args) => {
+            resolve(func(args))
+        }, sec * 1000, args)
     });
 }
 
 // tweet
 ee.on("tweet", (tweet) => {
+    console.log("===== tweet =====");
     if (true) return;
     if (config.DEBUG) {
         console.log("DEBUG tweet");
@@ -33,8 +34,17 @@ ee.on("tweet", (tweet) => {
     });
 });
 
-const tweet_data = (json) => {
+const eew_match = (str, regex) => {
+    let m = str.match(new RegExp(regex));
+    let [anytext = null, ret = null] = (m == null) ? [] : m;
+    return ret;
+};
+
+// EEW tweet expand
+const tweet_data = (data) => {
+
     let {
+        "id": id,
         "id_str": id_str,
         "text": text = "",
         "user": {
@@ -47,22 +57,35 @@ const tweet_data = (json) => {
             ]
         },
         "geo": geo = { "coordinates": [0, 0] }
-    } = json;
+    } = data;
+
     let { "coordinates": lonlat = [0, 0] } = (!geo) ? {} : geo;
     let latlon = { latitude: lonlat[1], longitude: lonlat[0] };
+
+    let place = eew_match(data.text, config.TWITTER_EEW_PLACE_MATCH);
+    let depth = eew_match(data.text, config.TWITTER_EEW_DEPTH_MATCH);
+    let magnitude = eew_match(data.text, config.TWITTER_EEW_MAGNITUDE_MATCH);
+    let seismic = eew_match(data.text, config.TWITTER_EEW_SEISMIC_MATCH);
+
     return {
+        id: id,
         id_str: id_str,
         text: text,
         url: url,
         geo: geo,
         uid: uid,
         screen_name: screen_name,
-        latlon: latlon
+        latlon: latlon,
+        place: place,
+        depth: depth,
+        magnitude: magnitude,
+        seismic: seismic
     };
-}
+};
 
 // message filter
 ee.on("twitter.push", (data) => {
+    console.log("===== twitter.push =====");
 
     // exclude rt
     if (data["user"]["id_str"] != config.TWITTER_EEW_ACCOUNT.follow) return;
@@ -74,21 +97,18 @@ ee.on("twitter.push", (data) => {
         geo: geo,
         uid: uid,
         screen_name: screen_name,
-        latlon: latlon
+        latlon: latlon,
+        seismic: seismic
     } = tweet_data(data);
 
-    console.log(text);
-    console.log(url);
-    console.log(latlon);
+    console.log("text=" + text);
+    console.log("url=" + url);
+    console.log("latlon=" + JSON.stringify(latlon));
+    console.log("seismic=" + seismic);
 
     // 所在地と発生地点の比較
     // 範囲外であればスキップ
     //    if (!geolib.isPointInCircle(latlon, config.QUAKE_FILTER_CIRCLE_CENTER, config.QUAKE_FILTER_CIRCLE_RADIUS)) return;
-
-    let m = data.text.match(new RegExp(config.TWITTER_EEW_SEISMIC_MATCH));
-    let [anytext = null, seismic = null] = (m == null) ? [] : m;
-    console.log(m);
-    console.log("seismic=" + seismic);
 
     // 震度でツイート内容を変える
     let tweet = {
@@ -107,7 +127,40 @@ ee.on("twitter.push", (data) => {
 
 // statistics
 ee.on("twitter.statistics", (data) => {
+    console.log("===== twitter.statistics =====");
 
+    // exclude rt
+    if (data["user"]["id_str"] != config.TWITTER_EEW_ACCOUNT.follow) return;
+
+    // EEWからn秒後までのツイートを取得
+    sleep(60 * 5, ([data]) => {
+        console.log("===== statistics =====");
+
+        let {
+            id_str: id_str,
+            url: url,
+            place: place,
+            depth: depth,
+            magnitude: magnitude,
+            seismic: seismic
+        } = tweet_data(data);
+
+        let option = {
+            count: 200,
+            trim_user: true,
+            exclude_replies: true,
+            since_id: id_str
+        };
+
+        twitter.get("statuses/home_timeline.json", option, (error, data, response) => {
+            let count = 0;
+            data.forEach((tweet) => {
+                if (tweet.text.match(/揺れ|ゆれ/)) count++;
+            });
+            console.log(`${url},${place},${depth}km,M${magnitude},震度${seismic},${count}`);
+        });
+
+    }, data);
 });
 
 // twitter stream
@@ -144,5 +197,6 @@ twitter_setup();
 if (config.DEBUG) {
     config.TESTDATA.forEach((data, idx) => {
         ee.emit("twitter.push", data);
+        ee.emit("twitter.statistics", data);
     });
 }

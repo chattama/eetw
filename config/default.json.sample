@@ -6,6 +6,9 @@
         "access_token_secret": ""
     },
     "TWITTER_EEW_ACCOUNT": { "follow": "16052553", "screen_name": "eew_jp" },
+    "TWITTER_EEW_PLACE_MATCH": ".*頃、(.+)の深さ.*",
+    "TWITTER_EEW_DEPTH_MATCH": ".*の深さ(.+)km.*",
+    "TWITTER_EEW_MAGNITUDE_MATCH": ".*でマグニチュード(.+)の地震.*",
     "TWITTER_EEW_SEISMIC_MATCH": ".*最大震度は震度(.+)です。.*",
     "TWITTER_STREAM_FILTER": { "follow": "16052553", "screen_name": "eew_jp" },
     "QUAKE_FILTER_CIRCLE_CENTER": { "latitude": 35.689699, "longitude": 139.7005794, "desc": "新宿駅" },
