@@ -2,11 +2,15 @@
 
 const config = require("config");
 const geolib = require("geolib");
-const Twitter = require("twitter");
-const EventEmitter = require("events").EventEmitter;
 
-const twitter = new Twitter(config.TWITTER_API_KEY);
+const EventEmitter = require("events").EventEmitter;
 const ee = new EventEmitter();
+
+const Twitter = require("twitter");
+const twitter = new Twitter(config.TWITTER_API_KEY);
+
+const JsonDB = require("node-json-db");
+const db = new JsonDB("eew_statistics", true, true);
 
 const sleep = (sec, func, ...args) => {
     return new Promise(resolve => {
@@ -133,7 +137,7 @@ ee.on("twitter.statistics", (data) => {
     if (data["user"]["id_str"] != config.TWITTER_EEW_ACCOUNT.follow) return;
 
     // EEWからn秒後までのツイートを取得
-    sleep(60 * 5, ([data]) => {
+    sleep( /*60 * */ 5, ([data]) => {
         console.log("===== statistics =====");
 
         let {
@@ -158,6 +162,15 @@ ee.on("twitter.statistics", (data) => {
                 if (tweet.text.match(/揺れ|ゆれ/)) count++;
             });
             console.log(`${url},${place},${depth}km,M${magnitude},震度${seismic},${count}`);
+            db.push(`/${id_str}`, {
+                id_str: id_str,
+                url: url,
+                place: place,
+                depth: depth,
+                magnitude: magnitude,
+                seismic: seismic,
+                count: count
+            });
         });
 
     }, data);

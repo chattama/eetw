@@ -20,6 +20,7 @@
     "config": "^3.0.1",
     "events": "^3.0.0",
     "geolib": "^2.0.24",
+    "node-json-db": "^0.10.0",
     "twitter": "^1.7.1"
   }
 }
