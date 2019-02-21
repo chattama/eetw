@@ -137,7 +137,7 @@ ee.on("twitter.statistics", (data) => {
     if (data["user"]["id_str"] != config.TWITTER_EEW_ACCOUNT.follow) return;
 
     // EEWからn秒後までのツイートを取得
-    sleep( /*60 * */ 5, ([data]) => {
+    sleep(60 * 5, ([data]) => {
         console.log("===== statistics =====");
 
         let {
