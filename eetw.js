@@ -158,19 +158,25 @@ ee.on("twitter.statistics", (data) => {
 
         twitter.get("statuses/home_timeline.json", option, (error, data, response) => {
             let count = 0;
-            data.forEach((tweet) => {
-                if (tweet.text.match(/揺れ|ゆれ/)) count++;
-            });
-            console.log(`${url},${place},${depth}km,M${magnitude},震度${seismic},${count}`);
-            db.push(`/${id_str}`, {
+            let obj = {
                 id_str: id_str,
                 url: url,
                 place: place,
                 depth: depth,
                 magnitude: magnitude,
                 seismic: seismic,
-                count: count
+                count: 0,
+                tweets: []
+            };
+            data.forEach((tweet) => {
+                if (tweet.text.match(/揺れ|ゆれ/)) {
+                    count++;
+                    obj.tweets.push(tweet.text);
+                }
             });
+            obj.count = count;
+            console.log(`${url},${place},${depth}km,M${magnitude},震度${seismic},${count}`);
+            db.push(`/${id_str}`, obj);
         });
 
     }, data);
